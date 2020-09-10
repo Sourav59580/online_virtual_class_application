@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Chat | Application</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous">
+    </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
+    </script>
+    <style>
+        .meeting_container{
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container pt-4 p-0">
+        <div style="width:200px;">
+            <img src="images/logo.png" class="w-100">
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 order-md-1 order-2 p-2">
+                <h3 class="mb-3" style="letter-spacing: 2px;">Taking your physical event virtual?</h3>
+                <p>In this together. Keeping you securely connected wherever you are.</p>
+                <div class="mb-5 mt-4 text-nowrap"> 
+                    <a  href='/join' class="btn btn-warning px-4">Create Room</a>
+                    <button class="btn rounded-circle" style="position: relative;z-index:1000;left:-12px">or</button>
+                    <button class="btn btn-success px-4 join" style="margin-left: -26px;">Join Room</button>
+                </div>
+                <div class="w-100 py-4 bg-white px-3 text-center meeting_container" style="box-shadow: 0px 0px 5px 1px #ccc;">
+                    <h5>Join a Meeting</h5>
+                    <input type="text" class="form-control my-4 meeting_link" placeholder="Meeting link">
+                    <button class="btn btn-primary btn-block join-btn">JOIN</button>
+                </div>
+            </div>
+            <div class="col-md-8 d-flex justify-content-center order-md-2 order-1 mb-4">
+                <div class="bg-white p-4" style="box-shadow: 0px 0px 5px 1px #ccc;">
+                    <img src="images/google_meet_marketing_ongoing_meeting_grid_427cbb32d746b1d0133b898b50115e96.jpg" class='w-100'>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+    $(".join").click(function(){
+        $(".meeting_container").fadeToggle("slow");
+    })
+
+    $(document).ready(function(){
+       $(".join-btn").click(function(){
+           var link = $(".meeting_link").val();
+           window.location = link;
+       })
+    })
+</script>
+
+
+</body>
+
+</html>
