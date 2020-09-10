@@ -1,7 +1,7 @@
 const socket = io('/')
 const myPeer = new Peer(undefined,{
     host : '/',
-    port : '3001'
+    port : '443'
 })
 
 // select video grid container
