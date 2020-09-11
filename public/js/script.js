@@ -1,7 +1,8 @@
 const socket = io('/')
-const myPeer = new Peer(undefined,{
+const myPeer = new Peer(undefined, {
     path: '/peerjs',
-    host : '/',
+    host: '/',
+    // port: '3001'
     port : '443'
 })
 
@@ -21,40 +22,66 @@ var person = 1;
 const peers = {}
 
 navigator.mediaDevices.getUserMedia({
-    video:true,
-    audio:true
-}).then(stream =>{
+    video: true,
+    audio: true
+}).then(stream => {
     myVideoStream = stream;
     ownVideoStream = stream
-    addVideoStream(myvideo,ownVideoStream)
+    addVideoStream(myvideo, ownVideoStream)
 
-    myPeer.on('call',call =>{
+    myPeer.on('call', call => {
         call.answer(stream)
         const video = document.createElement('video')
-        call.on('stream',userVideoStream =>{
-            addVideoStream(video,userVideoStream) 
+        call.on('stream', userVideoStream => {
+            addVideoStream(video, userVideoStream)
         })
     })
 
-    socket.on('user-connected',userId=>{
-        console.log("User connected "+userId)
-        connectToNewUser(userId,stream);
+    socket.on('user-connected', userId => {
+        console.log("User connected " + userId)
+        connectToNewUser(userId, stream);
+    })
+
+    // message send to server
+    $('html').keydown(function (e) {
+        var msg = $("#chat_message").val();
+        if (e.which == 13 && msg.length > 0) {
+            socket.emit('message', msg);
+            $("#chat_message").val("");
+        }
+    })
+
+    // message get from server
+    socket.on('createMessage', message => {
+        $(".messages").append(`<li class='message'><b>User</b><br>${message}</li>`);
+        scrollToBottom();
     })
 
     // disconnect end call user
     socket.on('user-disconnected', userId => {
         if (peers[userId]) peers[userId].close()
-      })
+        person-=1;
+        console.log(person)
+        // send server count of user decrease
+        
+
+
+    })
 })
 
+
 // other new user video setup
-function connectToNewUser(userId,stream){
-    const call = myPeer.call(userId,stream)
+function connectToNewUser(userId, stream) {
+    person+=1;
+    console.log(person)
+    // send server count of user increase
+
+    const call = myPeer.call(userId, stream)
     const video = document.createElement("video")
-    call.on('stream',userVideoStream =>{
-        addVideoStream(video,userVideoStream)
+    call.on('stream', userVideoStream => {
+        addVideoStream(video, userVideoStream)
     })
-    call.on('close',()=>{
+    call.on('close', () => {
         video.remove();
     })
     peers[userId] = call
@@ -62,27 +89,32 @@ function connectToNewUser(userId,stream){
 
 
 // own video setup
-function addVideoStream(video,stream) {
+function addVideoStream(video, stream) {
     video.srcObject = stream
-    video.addEventListener('loadedmetadata',()=>{
+    video.addEventListener('loadedmetadata', () => {
         video.play()
     })
     videoGrid.append(video);
-  }
+}
 
 
-myPeer.on('open',id =>{
-    socket.emit('join-room',roomId,id)
+myPeer.on('open', id => {
+    socket.emit('join-room', roomId, id)
 })
 
+// scrollToBottom
+function scrollToBottom() {
+    var chat_window = $(".main__chat_window")
+    chat_window.scrollTop(chat_window.prop("scrollHeight"))
+}
 
 // muteUnmute
-function muteUnmute(){
+function muteUnmute() {
     const enabled = myVideoStream.getAudioTracks()[0].enabled;
-    if(enabled){
+    if (enabled) {
         myVideoStream.getAudioTracks()[0].enabled = false;
         $(".audio").removeClass('d-none');
-    }else{
+    } else {
         myVideoStream.getAudioTracks()[0].enabled = true;
         $(".audio").addClass('d-none');
     }
@@ -91,46 +123,45 @@ function muteUnmute(){
 //play stop video
 function playStop() {
     let enabled = myVideoStream.getVideoTracks()[0].enabled;
-    if(enabled){
+    if (enabled) {
         myVideoStream.getVideoTracks()[0].enabled = false;
         $(".video").removeClass('d-none');
-    }else{
+    } else {
         myVideoStream.getVideoTracks()[0].enabled = true;
         $(".video").addClass('d-none');
     }
 }
 
 // share screen
-function shareScreen(){
-   
-    navigator.mediaDevices.getDisplayMedia({
-        video:true,
-        audio:true
-    }).then(stream =>{
-       ownVideoStream = stream;
-       addVideoStream(myvideo,ownVideoStream)
+function shareScreen() {
 
-       myPeer.on('call',call =>{
-        call.answer(stream)
-        const video = document.createElement('video')
-        call.on('stream',userVideoStream =>{
-            addVideoStream(video,userVideoStream) 
+    navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true
+    }).then(stream => {
+        ownVideoStream = stream;
+        addVideoStream(myvideo, ownVideoStream)
+
+        myPeer.on('call', call => {
+            call.answer(stream)
+            const video = document.createElement('video')
+            call.on('stream', userVideoStream => {
+                addVideoStream(video, userVideoStream)
+            })
+        })
+
+        socket.on('user-connected', userId => {
+            console.log("User connected " + userId)
+            connectToNewUser(userId, stream);
+        })
+
+        // disconnect end call user
+        socket.on('user-disconnected', userId => {
+            if (peers[userId]) peers[userId].close()
+            person -= 1;
+            console.log(person);
+            $(".participants").html(person);
         })
     })
 
-    socket.on('user-connected',userId=>{
-        console.log("User connected "+userId)
-        connectToNewUser(userId,stream);
-    })
-
-    // disconnect end call user
-    socket.on('user-disconnected', userId => {
-        if (peers[userId]) peers[userId].close()
-        person -=1;
-        console.log(person);
-        $(".participants").html(person);
-      })
-    })
-   
 }
-
