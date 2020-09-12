@@ -1,9 +1,19 @@
 
 // Name entry
 let name;
+let gender;
+let imagesrc;
 do {
     name = prompt('Please enter your name: ')
-} while(!name)
+    gender = prompt('Please enter your gender: ')
+} while(!name||!gender)
+
+// set avatar
+if(gender.toLowerCase()=='male')
+imagesrc = "https://img.icons8.com/color/36/000000/administrator-male.png";
+else if(gender.toLowerCase()=='female')
+imagesrc = "https://img.icons8.com/office/36/000000/person-female.png";
+
 
 
 const socket = io('/')
@@ -56,18 +66,25 @@ navigator.mediaDevices.getUserMedia({
     $('html').keydown(function (e) {
         var text = $("#chat_message").val();
         if (e.which == 13 && text.length > 0) {
+            var d = new Date()
+            var time = (d.toLocaleTimeString().replace(/:\d{2}\s/,' '));
             let msg = {
                 user: name,
-                message: text.trim()
+                message: text.trim(),
+                imagesrc: imagesrc,
+                time : time
             }
             socket.emit('message', msg);
+            appendmessages(msg,'outgoing')
+            scrollToBottom();
             $("#chat_message").val("");
         }
     })
 
     // message get from server
     socket.on('createMessage', message => {
-        $(".messages").append(`<li class='message'><b>${message.user}</b><br>${message.message}</li>`);
+        //$(".messages").append(`<li class='message'><b>${message.user}</b><br>${message.message}</li>`);
+        appendmessages(message,'incomming')
         scrollToBottom();
     })
 
@@ -129,6 +146,45 @@ function child(){
 myPeer.on('open', id => {
     socket.emit('join-room', roomId, id)
 })
+
+// outgoing message
+function appendmessages(msg,type){
+  if(type=='incomming')
+  {
+    $(".messages").append(`<div class="incomming my-1">
+    <div class="d-flex justify-content-between px-3 mb-1">
+        <small>${msg.user}</small>
+        <small>${msg.time}</small>
+    </div>
+    <div class="media px-3">
+        <div class="rounded-circle text-center text-light">
+            <img class="direct-chat-img" src="${msg.imagesrc}" alt="message user image">
+        </div>
+        <div class="media-body bg-warning p-2 rounded ml-2">
+            <p>${msg.message}</p>
+        </div>
+    </div>
+</div>`)
+  }else{
+    $(".messages").append(` <div class="outgoing mt-3">
+    <div class="d-flex justify-content-between px-3 mb-1">
+        <small>${msg.time}</small>
+        <small>${msg.user}</small>
+    </div>
+    <div class="media px-3">
+        <div class="media-body bg-info text-light p-2 rounded mr-2">
+            <p>${msg.message}</p>
+        </div>
+        <div class="rounded-circle text-center text-light">
+            <img class="direct-chat-img" src="${msg.imagesrc}" alt="message user image">
+        </div>
+    </div>
+</div>`)
+  }
+
+}
+
+
 
 // scrollToBottom
 function scrollToBottom() {

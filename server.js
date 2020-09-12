@@ -39,7 +39,7 @@ io.on('connection', socket =>{
 
         //send msg same roomid
         socket.on('message',(msg)=>{
-            io.to(roomId).emit('createMessage',msg);
+            socket.to(roomId).broadcast.emit('createMessage',msg);
         })
 
         // count participants
