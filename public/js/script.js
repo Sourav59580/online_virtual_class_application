@@ -1,8 +1,16 @@
+
+// Name entry
+let name;
+do {
+    name = prompt('Please enter your name: ')
+} while(!name)
+
+
 const socket = io('/')
 const myPeer = new Peer(undefined, {
     path: '/peerjs',
     host: '/',
-    // port: '3001'
+    //port: '3001'
     port : '443'
 })
 
@@ -13,6 +21,7 @@ let myVideoStream;
 let ownVideoStream;
 //create a video 
 const myvideo = document.createElement("VIDEO");
+myvideo.addClass = "video"
 myvideo.muted = true;
 
 //count person
@@ -32,6 +41,7 @@ navigator.mediaDevices.getUserMedia({
     myPeer.on('call', call => {
         call.answer(stream)
         const video = document.createElement('video')
+        video.addClass = "video"
         call.on('stream', userVideoStream => {
             addVideoStream(video, userVideoStream)
         })
@@ -44,8 +54,12 @@ navigator.mediaDevices.getUserMedia({
 
     // message send to server
     $('html').keydown(function (e) {
-        var msg = $("#chat_message").val();
-        if (e.which == 13 && msg.length > 0) {
+        var text = $("#chat_message").val();
+        if (e.which == 13 && text.length > 0) {
+            let msg = {
+                user: name,
+                message: text.trim()
+            }
             socket.emit('message', msg);
             $("#chat_message").val("");
         }
@@ -53,15 +67,14 @@ navigator.mediaDevices.getUserMedia({
 
     // message get from server
     socket.on('createMessage', message => {
-        $(".messages").append(`<li class='message'><b>User</b><br>${message}</li>`);
+        $(".messages").append(`<li class='message'><b>${message.user}</b><br>${message.message}</li>`);
         scrollToBottom();
     })
 
     // disconnect end call user
     socket.on('user-disconnected', userId => {
         if (peers[userId]) peers[userId].close()
-        person-=1;
-        console.log(person)
+        child();
         // send server count of user decrease
         
 
@@ -78,6 +91,7 @@ function connectToNewUser(userId, stream) {
 
     const call = myPeer.call(userId, stream)
     const video = document.createElement("video")
+    video.addClass = "video"
     call.on('stream', userVideoStream => {
         addVideoStream(video, userVideoStream)
     })
@@ -91,12 +105,26 @@ function connectToNewUser(userId, stream) {
 // own video setup
 function addVideoStream(video, stream) {
     video.srcObject = stream
+    video.addClass = "video"
     video.addEventListener('loadedmetadata', () => {
         video.play()
+        child();
     })
     videoGrid.append(video);
 }
 
+function child(){
+    count = 0;
+    var width = ($("#video-grid").innerWidth());
+    console.log(width);
+    $("video").addClass("video")
+    var child = $("#video-grid video").length
+    console.log(child);
+    $(".participants").html("");
+    $(".participants").html(child)
+    $(".video").css("width",width/child);
+    $(".video").css("height","auto");
+ }
 
 myPeer.on('open', id => {
     socket.emit('join-room', roomId, id)
@@ -125,10 +153,10 @@ function playStop() {
     let enabled = myVideoStream.getVideoTracks()[0].enabled;
     if (enabled) {
         myVideoStream.getVideoTracks()[0].enabled = false;
-        $(".video").removeClass('d-none');
+        $(".playstop").removeClass('d-none');
     } else {
         myVideoStream.getVideoTracks()[0].enabled = true;
-        $(".video").addClass('d-none');
+        $(".playstop").addClass('d-none');
     }
 }
 
